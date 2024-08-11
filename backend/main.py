@@ -15,9 +15,7 @@ client = OpenAI()
 app = FastAPI()
 
 def get_history_from_bucket(bucket_data):
-    return_str = ''
-
-    return return_str
+    return bucket_data
 
 async def access_google_bucket():
     key_path = ''
@@ -97,7 +95,18 @@ async def call_heygen_api(gpt_response):
 
 @app.post("/generate_video")
 async def generate_video(prompt: str):
-    bucket_data = await access_google_bucket()
+    #bucket_data = await access_google_bucket()
+    bucket_data = """You seriously took the last slice of pizza? Unbelievable. You always do this!
+Oh, give me a break. You were late to the event, as usual. If you were on time, maybe you would've gotten it.
+Late? You can't be serious. I was ten minutes late because I was picking up drinks for everyone. Unlike you, who just waltzed in empty-handed.
+Yeah, and I didn't ask you to do that. Maybe if you cared more about showing up on time instead of trying to be a hero, you'd have had some pizza.
+Oh, right. Because showing up on time and being useless is so much better. You didn't even say thanks for the drinks.
+I didn’t say thanks because you threw a fit over a slice of pizza. It’s just food, not the end of the world.
+It's not just about the pizza, it's about you always thinking only about yourself. Every. Single. Time.
+Oh please, stop being so dramatic. It's a slice of pizza, not some grand betrayal. Get over it.
+You know what? Forget it. Next time, I'll let you handle everything. Then we'll see how 'just a slice of pizza' feels when it's you left out.
+Fine by me. Maybe then you'll learn to prioritize being on time over playing the martyr. Enjoy your tantrum.
+And you enjoy being the selfish jerk everyone sees you as. Nice job living up to it."""
 
     gpt_response = await call_gpt_api(bucket_data, prompt)
 
@@ -140,7 +149,8 @@ if __name__  == "__main__":
     video_url_dict = generate_video("Hey I think that you can be a little kinder to your friend.")
     video_url = video_url_dict["video_url"]
     video_filename = "generated_video.mp4"
-    with open(video_filename, "wb") as video_filename:
+    with open(video_filename, "wb") as video_file:
         video_content = requests.get(video_url).content 
         video_file.write(video_content)
+    break 
 
