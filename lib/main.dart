@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
+import 'video_service.dart';
 import 'dart:math' as math;
 
 void main() {
@@ -27,6 +29,45 @@ class MirandaPage extends StatefulWidget {
 
 class _MirandaPageState extends State<MirandaPage> {
   Offset _dragPosition = Offset.zero;
+  late VideoPlayerController _controller;
+  bool _isVideoInitialized = false;
+  bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideo();
+  }
+
+  void _initializeVideo() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final videoUrl = await VideoService.generateVideo("Default prompt for avatar");
+      _controller = VideoPlayerController.network(videoUrl)
+        ..initialize().then((_) {
+          setState(() {
+            _isVideoInitialized = true;
+            _isLoading = false;
+          });
+          _controller.play();
+          _controller.setLooping(true);
+        });
+    } catch (e) {
+      print('Failed to generate video: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +93,58 @@ class _MirandaPageState extends State<MirandaPage> {
                         color: Colors.grey[900],
                         borderRadius: BorderRadius.circular(20),
                       ),
+                      const SizedBox(height: 20),
+                    Transform(
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001)
+                        ..rotateY(_calculateRotationY(context))
+                        ..rotateX(_calculateRotationX(context)),
+                      alignment: FractionalOffset.center,
+                      child: Stack(
+                        children: [
+                          if (_isLoading)
+                            Container(
+                              width: 270,
+                              height: 270,
+                              color: Colors.black,
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          else if (_isVideoInitialized)
+                            SizedBox(
+                              width: 270,
+                              height: 270,
+                              child: VideoPlayer(_controller),
+                            )
+                          else
+                            Image.network(
+                              'https://cdn.prod.website-files.com/65e89895c5a4b8d764c0d70e/662b9d36e383c902d2fc7874_thumbnail_%252880%2529.webp',
+                              width: 270,
+                              height: 270,
+                              fit: BoxFit.cover,
+                            ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            height: 135,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.9),
+                                    Colors.transparent,
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                      
+                      
                       child: Row(
                         children: const [
                           Icon(Icons.circle, color: Colors.green, size: 12),
