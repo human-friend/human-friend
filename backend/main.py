@@ -8,6 +8,8 @@ import requests
 import json 
 from dotenv import load_dotenv
 import time 
+import pdb 
+import asyncio 
 load_dotenv()
 
 client = OpenAI()
@@ -94,7 +96,8 @@ async def call_heygen_api(gpt_response):
 
 
 @app.post("/generate_video")
-async def generate_video(prompt: str):
+async def generate_video():
+    pdb.set_trace()
     #bucket_data = await access_google_bucket()
     bucket_data = """You seriously took the last slice of pizza? Unbelievable. You always do this!
 Oh, give me a break. You were late to the event, as usual. If you were on time, maybe you would've gotten it.
@@ -108,7 +111,7 @@ You know what? Forget it. Next time, I'll let you handle everything. Then we'll 
 Fine by me. Maybe then you'll learn to prioritize being on time over playing the martyr. Enjoy your tantrum.
 And you enjoy being the selfish jerk everyone sees you as. Nice job living up to it."""
 
-    gpt_response = await call_gpt_api(bucket_data, prompt)
+    gpt_response = await call_gpt_api(bucket_data)
 
     heygen_json = await call_heygen_api(gpt_response)
     video_id = heygen_json["data"]["video_id"]
@@ -146,11 +149,11 @@ And you enjoy being the selfish jerk everyone sees you as. Nice job living up to
 if __name__  == "__main__":
     test_gpt_response = "I think that you should consider your fight with your friend. I think that it is not the right thing to do. Maybe try apologizing a bit later."
     
-    video_url_dict = generate_video("Hey I think that you can be a little kinder to your friend.")
+    video_url_dict = asyncio.run(generate_video())
     video_url = video_url_dict["video_url"]
     video_filename = "generated_video.mp4"
     with open(video_filename, "wb") as video_file:
         video_content = requests.get(video_url).content 
         video_file.write(video_content)
-    break 
+    
 
